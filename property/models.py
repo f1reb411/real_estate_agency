@@ -9,7 +9,7 @@ class Flat(models.Model):
     owner = models.CharField('ФИО владельца', max_length=200)
     owners_phonenumber = models.CharField('Номер владельца', max_length=20)
     owner_pure_phone = PhoneNumberField('нормализованный номер владельца', blank=True)
-    new_building = models.NullBooleanField(blank=True)
+    new_building = models.NullBooleanField('новостройка', blank=True, db_index=True)
     created_at = models.DateTimeField(
         'Когда создано объявление',
         default=timezone.now,
@@ -63,17 +63,19 @@ class Flat(models.Model):
 
 
 class Complaint(models.Model):
-    user = models.ForeignKey(
+    customer = models.ForeignKey(
         User,
         null=True,
         verbose_name='кто жаловался',
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        related_name='customer_complaints'
     )
     flat = models.ForeignKey(
         Flat,
         verbose_name='квартира, на которую пожаловались',
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        related_name='flat_complaints'
     )
     text = models.TextField('текст', blank=True)
 
@@ -87,7 +89,7 @@ class Owner(models.Model):
         related_name='owners',
         blank=True,
         verbose_name='Квартиры в собственности',
-        db_index=True
+        db_index=True,
     )
 
     def __str__(self):
